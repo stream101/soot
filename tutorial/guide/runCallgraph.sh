@@ -25,10 +25,8 @@ PTH="${BASE}/polyglot/lib/pth.jar"
 CP="${SOOT}:${JASMIN}:${JFLEX}${COFFER}:${JAVACUP}:${PAO}:${POLYGLOT}:${PTH}:."
 
 echo "Call graph example"
-#FILE="dk/brics/soot/callgraphs/CallGraphExample.java"
-FILE="dk/brics/soot/RunVeryBusyAnalysis.java"
-#cd examples/call_graph/src
-cd examples/analysis_framework/src
+FILE="dk/brics/soot/callgraphs/CallGraphExample.java"
+cd examples/call_graph/src
 echo "compiling ${FILE}"
 javac -cp ${CP} ${FILE}
 
@@ -39,8 +37,7 @@ if [ ${EXITSTATUS} != 0 ]; then
 fi
 
 echo "running"
-#java -Xmx512m -cp ${CP} dk/brics/soot/callgraphs/CallGraphExample
-java -Xmx512m -cp ${CP} dk/brics/soot/RunVeryBusyAnalysis
+java -Xmx512m -cp ${CP} dk/brics/soot/callgraphs/CallGraphExample -soot-class-path /lib/jvm/jdk1.7.0_72/jre/lib/rt.jar:.
 cd -
 
 exit $?;
