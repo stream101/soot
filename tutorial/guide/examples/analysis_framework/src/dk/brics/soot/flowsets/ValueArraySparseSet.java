@@ -18,7 +18,7 @@ import soot.EquivTo;
  * references).</li>
  * <li>All fields and methods declared as private, changed to protected.</li>
  * </ol> 
- * @author Changes made by Árni Einarsson
+ * @author Changes made by Arni Einarsson
  * 
  */public class ValueArraySparseSet extends AbstractFlowSet {
 	protected static final int DEFAULT_SIZE = 8;
@@ -47,7 +47,7 @@ import soot.EquivTo;
 		return new ValueArraySparseSet(this);
 	}
 
-	public Object emptySet() {
+	public FlowSet emptySet() {
 		return new ValueArraySparseSet();
 	}
 

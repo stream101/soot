@@ -29,10 +29,13 @@ public class RunVeryBusyAnalysis
 		String sep = File.separator;
 		String pathSep = File.pathSeparator;
 		String path = System.getProperty("java.home") + sep + "lib" + sep
-				+ "rt.jar";
-		path += pathSep + "." + sep + "tutorial" + sep + "guide" + sep
-				+ "examples" + sep + "analysis_framework" + sep + "src";
+				+ "rt.jar" + pathSep + ".";
+		//path += pathSep + "." + sep + "tutorial" + sep + "guide" + sep
+		//		+ "examples" + sep + "analysis_framework" + sep + "src";
 		Options.v().set_soot_classpath(path);
+		//for debug
+		System.out.println("soot path: " + path);			
+		System.out.println("soot class: " + args[0]);			
 
 		SootClass sClass = Scene.v().loadClassAndSupport(args[0]);
 		sClass.setApplicationClass();

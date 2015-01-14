@@ -1,4 +1,4 @@
-#!/usr/local/bin/bash
+#!/bin/bash
 
 
 if [ $# != 0 ]
@@ -9,24 +9,26 @@ if [ $# != 0 ]
 fi
 
 
-BASE="/users/fagidiot/SOOT"
+BASE="/home/xinxin/Mobile/tools"
 
-SOOT="${BASE}/soot-2.3.0/lib/sootclasses-2.3.0.jar"
+SOOT="${BASE}/soot/lib/soot-trunk.jar"
 
-JASMIN="${BASE}/jasmin-2.3.0/lib/jasminclasses-2.3.0.jar"
+JASMIN="${BASE}/libs/jasminclasses-2.4.0.jar"
 
-JFLEX="${BASE}/polyglot-1.3.5/lib/JFlex.jar"
-COFFER="${BASE}/polyglot-1.3.5/lib/coffer.jar"
-JAVACUP="${BASE}/polyglot-1.3.5/lib/java_cup.jar"
-PAO="${BASE}/polyglot-1.3.5/lib/pao.jar"
-POLYGLOT="${BASE}/polyglot-1.3.5/lib/polyglot.jar"
-PTH="${BASE}/polyglot-1.3.5/lib/pth.jar"
+JFLEX="${BASE}/polyglot/lib/JFlex.jar"
+COFFER="${BASE}/polyglot/lib/coffer.jar"
+JAVACUP="${BASE}/libs/java_cup.jar"
+PAO="${BASE}/polyglot/lib/pao.jar"
+POLYGLOT="${BASE}/polyglot/lib/polyglot.jar"
+PTH="${BASE}/polyglot/lib/pth.jar"
 
 CP="${SOOT}:${JASMIN}:${JFLEX}${COFFER}:${JAVACUP}:${PAO}:${POLYGLOT}:${PTH}:."
 
 echo "Call graph example"
-FILE="dk/brics/soot/callgraphs/CallGraphExample.java"
-cd examples/call_graph/src
+#FILE="dk/brics/soot/callgraphs/CallGraphExample.java"
+FILE="dk/brics/soot/RunVeryBusyAnalysis.java"
+#cd examples/call_graph/src
+cd examples/analysis_framework/src
 echo "compiling ${FILE}"
 javac -cp ${CP} ${FILE}
 
@@ -37,7 +39,8 @@ if [ ${EXITSTATUS} != 0 ]; then
 fi
 
 echo "running"
-java -Xmx512m -cp ${CP} dk/brics/soot/callgraphs/CallGraphExample
+#java -Xmx512m -cp ${CP} dk/brics/soot/callgraphs/CallGraphExample
+java -Xmx512m -cp ${CP} dk/brics/soot/RunVeryBusyAnalysis
 cd -
 
 exit $?;

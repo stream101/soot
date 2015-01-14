@@ -35,7 +35,7 @@ public class CallGraphExample
 		@Override
 		protected void internalTransform(String phaseName, Map options) {
 		       CHATransformer.v().transform();
-                       SootClass a = Scene.v().getSootClass("testers.A");
+               SootClass a = Scene.v().getSootClass("testers.A");
 
 		       SootMethod src = Scene.v().getMainClass().getMethodByName("doStuff");
 		       CallGraph cg = Scene.v().getCallGraph();
