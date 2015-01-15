@@ -32,8 +32,6 @@ public class CallGraphExample
 			   "testers.A"			//
 	   }));
 	
-
-	    
 	   PackManager.v().getPack("wjtp").add(new Transform("wjtp.myTrans", new SceneTransformer() {
 
 		@Override
@@ -51,9 +49,9 @@ public class CallGraphExample
 			   // build call graph for target classes
 		       CallGraph cg = Scene.v().getCallGraph();
 
-				//edgesOutOf return an iterator over all edges that have 'src' as
-				//their source method 
-				//Adapts an iterator over a collection of Edge's
+			   //edgesOutOf return an iterator over all edges that have 'src' as
+			   //their source method 
+			   //Adapts an iterator over a collection of Edge's
 		       Iterator<MethodOrMethodContext> targets = new Targets(cg.edgesOutOf(src));
 		       while (targets.hasNext()) {
 		           SootMethod tgt = (SootMethod)targets.next();
