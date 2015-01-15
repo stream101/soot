@@ -23,9 +23,14 @@ import java.util.*;
 import soot.jimple.*;
 import soot.jimple.toolkits.callgraph.*;
 
+//This tool detects classes that contain static fields that are
+//initialized to non-constant values. 
+
+// Soot invokes the SceneTransformer just once for the program as a whole.
 public class BadFields extends SceneTransformer {
     public static void main(String[] args) 
     {
+	 //tells Soot to run Badfields after computing a CG for input program 
 	PackManager.v().getPack("cg").add(
 	    new Transform("cg.badfields", new BadFields()));
 	soot.Main.main(args);
@@ -37,24 +42,31 @@ public class BadFields extends SceneTransformer {
     protected void internalTransform(String phaseName, Map<String,String> options)
     {
         lastClass = null;
-
+		//We can see that this method requests all the program's application
+		//classes. Any analysis of the program itself would be interested in
+		//the application classes. (An analysis of the program and its
+		//libraries would request the library classes, which are a superset of
+		//the application classes.)
         for( Iterator<SootClass> clIt = Scene.v().getApplicationClasses().iterator(); clIt.hasNext(); ) {
 
             final SootClass cl = clIt.next();
             currentClass = cl;
             handleClass( cl );
+			//hanlde each class's methods
             for( Iterator<SootMethod> it = cl.methodIterator(); it.hasNext(); ) {
                 handleMethod( it.next() );
             }
         }
+		// why setCallGraph here ? 
         Scene.v().setCallGraph( new CallGraph() );
     }
 
     private void handleClass( SootClass cl ) {
+		//Get all the fields
         for( Iterator<SootField> fIt = cl.getFields().iterator(); fIt.hasNext(); ) {
             final SootField f = fIt.next();
-            if( !f.isStatic() ) continue;
-            String typeName = f.getType().toString();
+            if( !f.isStatic() ) continue;  // only interested in static ones 
+            String typeName = f.getType().toString(); //
             if( typeName.equals( "java.lang.Class" ) ) continue;
             if( f.isFinal() ) {
                 if( f.getType() instanceof PrimType ) continue;
@@ -76,7 +88,11 @@ public class BadFields extends SceneTransformer {
     }
 
     private void handleMethod( SootMethod m ) {
-        if( !m.isConcrete() ) return;
+        if( !m.isConcrete() ) return; //not phantom, abstract or native.
+		//retrieveActiveBody: Returns the active body if present, else constructs an active body
+		//and returns that.
+		//getUseAndDefBoxes: Returns a list of boxes corresponding to Values either used or
+		//defined in any unit of this Body.
         for( Iterator<ValueBox> bIt = m.retrieveActiveBody().getUseAndDefBoxes().iterator(); bIt.hasNext(); ) {
             final ValueBox b = bIt.next();
             Value v = b.getValue();
@@ -102,6 +118,7 @@ public class BadFields extends SceneTransformer {
                 warn( ""+m+" calls System.exit" );
             }
         }
+	    // class initializers are compiled to methods called <clinit>
         if( m.getName().equals( "<clinit>" ) ) {
             for( Iterator<Unit> sIt = m.getActiveBody().getUnits().iterator(); sIt.hasNext(); ) {
                 final Stmt s = (Stmt) sIt.next();

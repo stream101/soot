@@ -651,6 +651,8 @@ public class Scene  //extends AbstractHost
             Main.v().resolveTimer.start();
         */
         
+	    //debug by xinxin
+        //G.v().out.println("try load " + className);
         setPhantomRefs(true);
         //SootResolver resolver = new SootResolver();
         if( !getPhantomRefs() 

@@ -1,0 +1,2 @@
+#!/bin/bash
+java soot.tools.BadFields -soot-class-path $SOOTCLASSPATH:. -W -f j BadFieldsTester

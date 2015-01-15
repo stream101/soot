@@ -38,15 +38,22 @@ public class CallGraphExample
 
 		@Override
 		protected void internalTransform(String phaseName, Map options) {
-
+			  System.out.println("soot path: " + Scene.v().getSootClassPath());
+				
+				//Builds an invoke graph using Class Hierarchy Analysis
 		       CHATransformer.v().transform();
-               
-			   //System.out.println("Soot class path " + Scene.v().getSootClassPath());
+              
+               //Return the SootClass with class name  
 			   SootClass a = Scene.v().getSootClass("testers.A");
-
+					
+			   //retrieve the method src with name	
 		       SootMethod src = Scene.v().getMainClass().getMethodByName("doStuff");
+			   // build call graph for target classes
 		       CallGraph cg = Scene.v().getCallGraph();
 
+				//edgesOutOf return an iterator over all edges that have 'src' as
+				//their source method 
+				//Adapts an iterator over a collection of Edge's
 		       Iterator<MethodOrMethodContext> targets = new Targets(cg.edgesOutOf(src));
 		       while (targets.hasNext()) {
 		           SootMethod tgt = (SootMethod)targets.next();
@@ -58,7 +65,6 @@ public class CallGraphExample
 
            args = argsList.toArray(new String[0]);
 		   
-		   System.out.println("soot path: "+Arrays.toString(args));           
            soot.Main.main(args);
 	}
 }

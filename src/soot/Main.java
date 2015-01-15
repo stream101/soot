@@ -209,6 +209,7 @@ public class Main {
             
             autoSetOptions();
 
+			G.v().out.println("Soot class path: " + Scene.v().getSootClassPath());
             G.v().out.println("Soot started on " + start);
 
             Scene.v().loadNecessaryClasses();
