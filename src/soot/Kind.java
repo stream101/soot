@@ -42,6 +42,9 @@ public final class Kind implements Numberable
     public static final Kind EXECUTOR = new Kind( "EXECUTOR" );
     /** Implicit call to AsyncTask.doInBackground() due to AsyncTask.execute() call. */
     public static final Kind ASYNCTASK = new Kind( "ASYNCTASK" );
+    /** Implicit call to AsyncTaskLoader.loadInBackground() due to new AsyncTaskLoader call. */
+    public static final Kind ASYNCTASKLOADER = new Kind( "ASYNCTASKLOADER"
+);//xinxin.debug
     /** Implicit call to java.lang.ref.Finalizer.register from new bytecode. */
     public static final Kind FINALIZE = new Kind( "FINALIZE" );
     /** Implicit call to finalize() from java.lang.ref.Finalizer.invokeFinalizeMethod(). */
@@ -72,7 +75,8 @@ public final class Kind implements Numberable
     public boolean passesParameters() {
         return isExplicit() || this == THREAD || this == EXECUTOR || this == ASYNCTASK || this == FINALIZE ||
             this == PRIVILEGED || this == NEWINSTANCE || this == INVOKE_FINALIZE ||
-            this == REFL_INVOKE || this == REFL_CONSTR_NEWINSTANCE || this == REFL_CLASS_NEWINSTANCE;
+            this == REFL_INVOKE || this == REFL_CONSTR_NEWINSTANCE || 
+			this == REFL_CLASS_NEWINSTANCE || this == ASYNCTASKLOADER;//xinxin.debug
     }
 
     /** Returns true if the call is due to an explicit invoke statement. */
@@ -118,6 +122,11 @@ public final class Kind implements Numberable
     	return this == ASYNCTASK;
     }
     
+	//xinxin.debug
+	public boolean isAsyncTaskLoader() {
+    	return this == ASYNCTASKLOADER;
+    }
+
     public boolean isPrivileged() {
     	return this == PRIVILEGED;
     }

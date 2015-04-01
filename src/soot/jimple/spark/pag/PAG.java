@@ -790,7 +790,8 @@ public class PAG implements PointsToAnalysis {
         Pair<Node, Node> pval;
         
         if( e.isExplicit() || e.kind() == Kind.THREAD
-        		 || e.kind() == Kind.ASYNCTASK ) {
+        		 || e.kind() == Kind.ASYNCTASK 
+				 || e.kind() == Kind.ASYNCTASKLOADER) {//xinxin.debug
             addCallTarget( srcmpag, tgtmpag, (Stmt) e.srcUnit(),
                            e.srcCtxt(), e.tgtCtxt(), e );
         }
@@ -1043,11 +1044,20 @@ public class PAG implements PointsToAnalysis {
                                      Context srcContext,
                                      Context tgtContext,
                                      Edge e ) {
+    	
         MethodNodeFactory srcnf = srcmpag.nodeFactory();
         MethodNodeFactory tgtnf = tgtmpag.nodeFactory();
         InvokeExpr ie = s.getInvokeExpr();
         boolean virtualCall = callAssigns.containsKey(ie);
         int numArgs = ie.getArgCount();
+       
+       
+        //Since we create a virtual edge from Loader.init(para) to Loader.loadInBackground(),
+        //init carry 1 arg, so we manually set numArgs to 0
+        if (e.kind() == Kind.ASYNCTASKLOADER)
+        	numArgs = 0;
+        
+        
         for( int i = 0; i < numArgs; i++ ) {
             Value arg = ie.getArg( i );
             if( !( arg.getType() instanceof RefLikeType ) ) continue;
@@ -1056,7 +1066,7 @@ public class PAG implements PointsToAnalysis {
             Node argNode = srcnf.getNode( arg );
             argNode = srcmpag.parameterize( argNode, srcContext );
             argNode = argNode.getReplacement();
-
+            
             Node parm = tgtnf.caseParm( i );
             parm = tgtmpag.parameterize( parm, tgtContext );
             parm = parm.getReplacement();

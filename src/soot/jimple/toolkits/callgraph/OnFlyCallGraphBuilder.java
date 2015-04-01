@@ -34,6 +34,7 @@ import soot.Context;
 import soot.EntryPoints;
 import soot.FastHierarchy;
 import soot.G;
+import soot.Hierarchy;
 import soot.Kind;
 import soot.Local;
 import soot.MethodContext;
@@ -388,6 +389,10 @@ public final class OnFlyCallGraphBuilder
     private final ChunkedQueue<SootMethod> targetsQueue = new ChunkedQueue<SootMethod>();
     private final QueueReader<SootMethod> targets = targetsQueue.reader();
 
+    //by xinxin
+    SootClass asyncBase = Scene.v().forceResolve("android.content.AsyncTaskLoader", SootClass.BODIES);
+	Hierarchy h = Scene.v().getActiveHierarchy();
+    private List<SootClass> asyncLoaderSubClasses = new ArrayList<SootClass>();  
 
     public OnFlyCallGraphBuilder( ContextManager cm, ReachableMethods rm ) {
         this.cm = cm;
@@ -403,13 +408,35 @@ public final class OnFlyCallGraphBuilder
         } else {
         	reflectionModel = new TraceBasedReflectionModel();
         }
+        computeAsyncLoaderSubClasses();
     }
+    
     public OnFlyCallGraphBuilder( ContextManager cm, ReachableMethods rm, boolean appOnly ) {
         this( cm, rm );
         this.appOnly = appOnly;
+        computeAsyncLoaderSubClasses();
     }
-    public void processReachables() {
-        while(true) {
+    
+   void computeAsyncLoaderSubClasses() {
+	   if (asyncBase == null) 
+	        return;
+	   Hierarchy h = Scene.v().getActiveHierarchy();
+	   List<SootClass> subclasses = h.getSubclassesOf(asyncBase);
+	   for (SootClass subClass : subclasses ) {
+		  String className = subClass.getName();
+		 if (className.startsWith("android.")
+					|| className.startsWith("java.")
+					|| className.startsWith("sun."))
+		 	continue;
+		 
+		 asyncLoaderSubClasses.add(subClass);
+	   }
+   
+   }
+   
+    
+    public void processReachables() {  	
+    	while(true) {
             if( !worklist.hasNext() ) {
                 rm.update();
                 if( !worklist.hasNext() ) break;
@@ -421,12 +448,14 @@ public final class OnFlyCallGraphBuilder
             processNewMethodContext( momc );
         }
     }
+    
     public boolean wantTypes( Local receiver ) {
         return receiverToSites.get(receiver) != null;
     }
+    
     public void addType( Local receiver, Context srcContext, Type type, Context typeContext ) {
         FastHierarchy fh = Scene.v().getOrMakeFastHierarchy();
-        for( Iterator<VirtualCallSite> siteIt = receiverToSites.get( receiver ).iterator(); siteIt.hasNext(); ) {
+        for( Iterator<VirtualCallSite> siteIt = receiverToSites.get( receiver ).iterator(); siteIt.hasNext(); ) { 	
             final VirtualCallSite site = siteIt.next();
             if( site.kind() == Kind.THREAD && !fh.canStoreType( type, clRunnable))
                 continue;
@@ -434,10 +463,13 @@ public final class OnFlyCallGraphBuilder
                 continue;
             if( site.kind() == Kind.ASYNCTASK && !fh.canStoreType( type, clAsyncTask ))
                 continue;
-
+            if( site.kind() == Kind.ASYNCTASKLOADER && !fh.canStoreType( type, clAsyncTaskLoader ))
+                continue;
+           
             if( site.iie() instanceof SpecialInvokeExpr && site.kind != Kind.THREAD
             		&& site.kind != Kind.EXECUTOR
-            		&& site.kind != Kind.ASYNCTASK ) {
+            		&& site.kind != Kind.ASYNCTASK
+            		&& site.kind != Kind.ASYNCTASKLOADER) {
             	SootMethod target = VirtualCalls.v().resolveSpecial( 
                             (SpecialInvokeExpr) site.iie(),
                             site.subSig(),
@@ -445,7 +477,7 @@ public final class OnFlyCallGraphBuilder
             	//if the call target resides in a phantom class then "target" will be null;
             	//simply do not add the target in that case
             	if(target!=null) {
-            		targetsQueue.add( target );            		
+            		targetsQueue.add( target );    
             	} 
             } else {
                 VirtualCalls.v().resolve( type,
@@ -530,6 +562,17 @@ public final class OnFlyCallGraphBuilder
         getImplicitTargets( m );
         findReceivers(m, b);
     }
+    
+    SootMethod findLoadInBackground(SootClass sc) {
+    	SootMethod tgtMethod = null;
+    	for (SootMethod sm : sc.getMethods()) {
+    		if(sm.getName().equals("loadInBackground")) {
+				tgtMethod = sm;
+			}
+    	}
+    	return tgtMethod;
+    }
+    
     private void findReceivers(SootMethod m, Body b) {
         for( final Unit u : b.getUnits() ) {
             final Stmt s = (Stmt) u;
@@ -559,6 +602,24 @@ public final class OnFlyCallGraphBuilder
                         addVirtualCallSite( s, m, receiver, iie, sigDoInBackground,
                                 Kind.ASYNCTASK );
                     }
+					
+                    //add implicit call to loadInBackground(). xinxin.debug 
+                    if (ie instanceof SpecialInvokeExpr) {
+                    	SootClass sc = iie.getMethodRef().declaringClass();
+                    	//ok, found init subclasses of AsyncTaskLoader
+                    	if (this.asyncLoaderSubClasses.contains(sc)) {
+             
+                    		//Find loadInBackground 
+                    		SootMethod background = findLoadInBackground(sc);
+                    	    NumberedString sigLoad = background.getNumberedSubSignature();
+						    addVirtualCallSite(s, m, receiver, iie, sigLoad, 
+								Kind.ASYNCTASKLOADER);
+                    	}
+                    	 
+                    }
+                    
+					
+
                 } else if (ie instanceof DynamicInvokeExpr) {
                 	if(options.verbose())
                 		G.v().out.println("WARNING: InvokeDynamic to "+ie+" not resolved during call-graph construction.");
@@ -722,10 +783,14 @@ public final class OnFlyCallGraphBuilder
         findOrAdd( "java.lang.Object run()" );
     protected final NumberedString sigDoInBackground = Scene.v().getSubSigNumberer().
             findOrAdd( "java.lang.Object doInBackground(java.lang.Object[])" );
+    
+    
+    
     protected final NumberedString sigForName = Scene.v().getSubSigNumberer().
         findOrAdd( "java.lang.Class forName(java.lang.String)" );
     protected final RefType clRunnable = RefType.v("java.lang.Runnable");
     protected final RefType clAsyncTask = RefType.v("android.os.AsyncTask");
+    protected final RefType clAsyncTaskLoader = RefType.v("android.content.AsyncTaskLoader");
     
 }
 

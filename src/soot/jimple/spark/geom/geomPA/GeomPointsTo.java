@@ -393,7 +393,8 @@ public class GeomPointsTo extends PAG
 			
 			if ( edge.isThreadRunCall() ||
 					edge.kind().isExecutor() ||
-					edge.kind().isAsyncTask() ) {
+					edge.kind().isAsyncTask() || 
+					edge.kind().isAsyncTaskLoader()) {//xinxin.debug
 				// We don't modify the treatment to the thread run() calls
 				thread_run_callsites.add(callsite);
 			}

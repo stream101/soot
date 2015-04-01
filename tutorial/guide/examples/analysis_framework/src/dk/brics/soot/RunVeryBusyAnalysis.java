@@ -29,7 +29,7 @@ public class RunVeryBusyAnalysis
 		String sep = File.separator;
 		String pathSep = File.pathSeparator;
 		String path = System.getProperty("java.home") + sep + "lib" + sep
-				+ "rt.jar" + pathSep + ".";
+				+ "rt.jar" + pathSep + "/Users/xinxin/Work/Mobile/tools/soot/tutorial/guide/examples/analysis_framework/src";
 		//path += pathSep + "." + sep + "tutorial" + sep + "guide" + sep
 		//		+ "examples" + sep + "analysis_framework" + sep + "src";
 		Options.v().set_soot_classpath(path);

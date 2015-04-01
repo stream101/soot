@@ -95,6 +95,7 @@ public class Scene  //extends AbstractHost
         kindNumberer.add( Kind.THREAD );
         kindNumberer.add( Kind.EXECUTOR );
         kindNumberer.add( Kind.ASYNCTASK );
+        kindNumberer.add( Kind.ASYNCTASKLOADER );//xinxin.debug
         kindNumberer.add( Kind.FINALIZE );
         kindNumberer.add( Kind.INVOKE_FINALIZE );
         kindNumberer.add( Kind.PRIVILEGED );
@@ -255,6 +256,7 @@ public class Scene  //extends AbstractHost
 
 
 
+		G.v().out.println("xinxin.debug: soot class path " + sootClassPath);
         return sootClassPath;
     }
 
@@ -1340,6 +1342,7 @@ public class Scene  //extends AbstractHost
         
     	for (String name : Options.v().classes()) {
             loadNecessaryClass(name);
+			G.v().out.println("load class " + name);//xinxin.debug
         }
 
         loadDynamicClasses();
